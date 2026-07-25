@@ -122,10 +122,8 @@ pokio.ai (managed)              self-hosted
 └────┬─────┘                 └────┬─────┘
      │                            │
      ▼                            ▼
-┌──────────┐                 ┌──────────┐
-│  oncell  │                 │  pokio   │
-│  cloud   │                 │  runtime │
-└──────────┘                 └──────────┘
+  oncell cloud                 this repo
+  (runs it for you)            (you run it)
      │                            │
      ▼                            ▼
   Watchers → LLM → Tools → Ask human → Act
