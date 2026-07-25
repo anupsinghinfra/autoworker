@@ -1,193 +1,163 @@
 # Pokio
 
-**AI employee that works 24/7. Watches your repos and logs, finds issues, fixes them, opens PRs. You just approve.**
+**Hire AI employees that work 24/7.**
 
-```bash
-pokio watch --github myorg/app --github myorg/api
-```
+Pokio creates AI workers — engineers, support agents, researchers — that autonomously watch your repos, fix bugs, answer tickets, and write reports. They ask before anything consequential. You approve from the dashboard.
 
-That's it. It runs forever. Checks your repos every 10 minutes. When it finds a new issue, it reads the code, writes a fix, runs tests, and opens a PR. It asks you before merging. You approve from your terminal, or ignore and it waits.
+**[pokio.ai](https://pokio.ai)** — sign up, hire your first Pokio, connect GitHub. Done.
 
-Like [OpenWorker](https://github.com/andrewyng/openworker), but no desktop app. Runs anywhere — your server, a VM, or [pokio.ai](https://pokio.ai).
+---
 
-## Install
+## What Pokio does
 
-```bash
-npm install -g pokio
-```
+You don't assign work. Pokio finds it.
 
-## Setup
+| You hire | Pokio watches | Pokio does | You approve |
+|----------|--------------|------------|-------------|
+| **Engineer** | GitHub repos, error logs | Triages issues, writes fixes, runs tests, opens PRs | Merge PR |
+| **Support** | Zendesk, Slack channels | Answers tickets, searches KB, escalates hard cases | Send reply |
+| **Researcher** | Competitor sites, news | Writes weekly reports, spots market changes | Publish report |
+| **Ops** | CloudWatch, PagerDuty | Diagnoses alerts, writes fixes, pages humans for P0 | Deploy fix |
 
-```bash
-# Pick your LLM (Kimi K3 is default — fast and cheap)
-export MOONSHOT_API_KEY=sk-...       # or ANTHROPIC_API_KEY or OPENAI_API_KEY
-
-# GitHub access
-export GITHUB_TOKEN=ghp_...
-```
-
-## Run 24/7
-
-```bash
-# Watch one repo
-pokio watch --github myorg/app
-
-# Watch multiple repos
-pokio watch --github myorg/app --github myorg/api --github myorg/web
-
-# Watch repos + production logs
-pokio watch --github myorg/app --logs "docker logs myapp --since 1h"
-
-# Custom check interval (default: 10 min)
-pokio watch --github myorg/app --interval 5
-```
-
-### What it does automatically
-
-| Source | What it watches | What it does |
-|--------|----------------|-------------|
-| **GitHub issues** | New issues opened | Reads code, attempts fix, opens PR |
-| **GitHub PRs** | New PRs opened | Posts detailed code review |
-| **Logs** | Errors in output | Diagnoses root cause, fixes if possible |
-
-### Approval flow
-
-Pokio **never** pushes to main or merges without asking:
-
-```
-[watcher] New issue: myorg/app#47 — "Checkout fails with > 10 items"
-  [issue:47] step 1: shell(gh repo clone myorg/app workspace)
-  [issue:47] step 2: read_file(workspace/src/checkout.ts)
-  [issue:47] step 3: write_file(workspace/src/checkout.ts)
-  [issue:47] step 4: shell(cd workspace && npm test)
-  [issue:47] step 5: shell(cd workspace && git add -A && git commit ...)
-
-  ⏸ Open PR to fix checkout overflow? [y/n]: y
-
-  [issue:47] step 6: shell(cd workspace && gh pr create ...)
-  ✓ PR #48 opened
-```
-
-You can also run it non-interactively (auto-approves):
-
-```bash
-pokio watch --github myorg/app &  # background, auto-approves
-```
-
-## One-shot mode
-
-Don't want 24/7? Just run one task:
-
-```bash
-pokio "Fix the login timeout bug in myorg/app"
-pokio fix --repo myorg/app --issue "Cart total wrong"
-pokio review --repo myorg/app --pr 42
-```
-
-## Interactive mode
-
-```bash
-pokio chat
-→ Summarize the last 20 commits in myorg/app
-→ Find all TODO comments and create GitHub issues
-→ Write API docs from the codebase
-```
-
-## HTTP server
-
-```bash
-pokio serve  # → http://localhost:4747
-
-curl -X POST http://localhost:4747/do \
-  -d '{"task": "Fix the login bug in myorg/app"}'
-
-curl -X POST http://localhost:4747/github \
-  -d '{"action": "fix", "repo": "myorg/app", "issue": "Cart bug"}'
-```
-
-## Managed hosting
-
-Run on [pokio.ai](https://pokio.ai) — always on, $0 when idle, no server to manage.
-
-```bash
-pokio deploy --host pokio.ai  # coming soon
-```
+---
 
 ## How it works
 
 ```
-pokio watch --github myorg/app
-        │
-        │  every 10 min
-        ▼
-┌─────────────────────────┐
-│  Check for new issues   │ ← gh issue list
-│  Check for new PRs      │ ← gh pr list
-│  Check logs for errors  │ ← your log command
-└────────┬────────────────┘
-         │ found something new
-         ▼
-┌─────────────────────────┐
-│  LLM + tools loop       │
-│  • shell (git, gh, npm) │
-│  • read_file / write    │
-│  • ask_human            │
-└────────┬────────────────┘
-         │ asks for approval
-         ▼
-┌─────────────────────────┐
-│  Human approves (y/n)   │
-│  or auto-approves       │
-└────────┬────────────────┘
-         │
-         ▼
-    PR opened / review posted / issue commented
+1. Sign up at pokio.ai
+2. Click "Hire a Pokio"
+3. Pick role: Engineer
+4. Connect GitHub (one-click OAuth)
+5. Select repos to watch
+6. Pokio starts working. Checks every 10 minutes.
 ```
 
-## Models
+### What happens overnight
+
+```
+2:14 AM  New issue #51: "Timeout on /api/search"
+2:15 AM  Cloned repo, reading src/search.ts
+2:18 AM  Root cause: missing pagination, full table scan
+2:22 AM  Fixed. Added test. All 47 tests passing.
+2:23 AM  Opened PR #52 → waiting for your approval
+2:23 AM  Idle. $0.
+
+  ☀️ You wake up. Open pokio.ai.
+  One click: "Approve & merge PR #52"
+  Done.
+```
+
+---
+
+## Your team dashboard
+
+```
+┌──────────────────────────────────────────────────┐
+│  pokio.ai                          $5.70 today   │
+├──────────────────────────────────────────────────┤
+│                                                  │
+│  🟢 Alex · Engineer                              │
+│     Watching: myorg/app, myorg/api               │
+│     Today: Fixed #47, opened PR #48, reviewed #49│
+│     Cost: $4.20                                  │
+│                                                  │
+│  🟡 Sam · Support                                │
+│     Watching: #support, Zendesk                  │
+│     ⏸ "Refund $200 for order #123?"              │
+│     [Approve] [Deny]                             │
+│                                                  │
+│  🟢 Jordan · Researcher                          │
+│     Watching: competitor blogs                   │
+│     Last: Weekly report generated                │
+│     Cost: $0.00 (idle)                           │
+│                                                  │
+│  [+ Hire another Pokio]                          │
+└──────────────────────────────────────────────────┘
+```
+
+---
+
+## Pricing
+
+| Plan | Pokios | Price | Best for |
+|------|--------|-------|----------|
+| **Starter** | 1 | Free | Try it out |
+| **Team** | 5 | $49/mo | Small teams |
+| **Company** | Unlimited | $199/mo | Scaling orgs |
+
+Pokios only cost when working. **$0 when idle.** Typical engineer Pokio: ~$3-5/day.
+
+---
+
+## Open source
+
+Pokio is fully open source (Apache 2.0). You can self-host it or use [pokio.ai](https://pokio.ai) for managed hosting.
+
+### Self-host
 
 ```bash
-# Default (fast, cheap)
-pokio watch --github myorg/app
+git clone https://github.com/anupsinghinfra/pokio.ai
+cd pokio.ai
+npm install
 
-# Use Claude for complex reasoning
-POKIO_MODEL=claude-opus pokio watch --github myorg/app
+# Set your LLM key
+export MOONSHOT_API_KEY=sk-...   # or ANTHROPIC_API_KEY
 
-# Use per-task
-pokio "Design the new auth system"  # uses default
-POKIO_MODEL=claude-opus pokio "Design the new auth system"  # uses opus
+# Set GitHub access
+export GITHUB_TOKEN=ghp_...
+
+# Run
+npm run dev
 ```
 
-## Data
-
-All local. SQLite in `.pokio/`. No cloud, no telemetry. Delete the folder to reset.
+### Architecture
 
 ```
-.pokio/
-└── pokio.db    # tasks, steps, seen items, config
+pokio.ai (managed)              self-hosted
+    │                               │
+    ▼                               ▼
+┌──────────┐                 ┌──────────┐
+│ pokio.ai │                 │ your     │
+│ dashboard│                 │ server   │
+└────┬─────┘                 └────┬─────┘
+     │                            │
+     ▼                            ▼
+┌──────────┐                 ┌──────────┐
+│  oncell  │                 │  pokio   │
+│  cloud   │                 │  runtime │
+└──────────┘                 └──────────┘
+     │                            │
+     ▼                            ▼
+  Watchers → LLM → Tools → Ask human → Act
 ```
 
-## Programmatic API
+### Tech stack
 
-```typescript
-import { runWorker, startWatchers } from "pokio";
+- **Runtime:** Node.js + TypeScript
+- **LLM:** Multi-provider (Kimi K3, Claude, OpenAI — bring your own key)
+- **State:** Local SQLite (self-hosted) or oncell (managed)
+- **Tools:** Shell, GitHub (gh CLI), file read/write, human approval
 
-// One-shot
-const result = await runWorker("Fix the bug", {
-  onAskHuman: async (q) => "approved",
-});
+---
 
-// 24/7 autonomous
-await startWatchers(
-  { github: { repos: ["myorg/app"], watch: ["issues", "prs"] } },
-  async (question) => "approved",
-);
-```
+## FAQ
+
+**How is this different from Devin / OpenWorker / Cursor?**
+Those are coding assistants you prompt. Pokio works autonomously 24/7 — you don't assign work, it finds work by watching your repos and logs. You just approve.
+
+**Is my code safe?**
+Pokio runs in isolated sandboxes. It never pushes to main — always opens PRs for your review. Self-host if you need full control.
+
+**What LLMs does it support?**
+Kimi K3 (default, fast & cheap), Claude (Anthropic), OpenAI, or any OpenAI-compatible provider. Bring your own API key.
+
+**What if I don't approve?**
+Pokio waits. Costs $0 while waiting. No timeout. It'll wait until you approve or deny.
+
+---
 
 ## License
 
 Apache 2.0
 
----
-
-**[pokio.ai](https://pokio.ai)** — managed Pokio. Always on, $0 when idle.
+**[pokio.ai](https://pokio.ai)** — Hire AI employees that work 24/7.
