@@ -1,192 +1,163 @@
 # AutoWorker
 
-**Your 24/7 AI employee. Like [OpenWorker](https://github.com/andrewyng/openworker), but cloud-native.**
+**Your AI employee. Runs locally or on [chay.ai](https://chay.ai).**
 
-AutoWorker is an autonomous AI agent that does real work — not chat. It connects to GitHub, Slack, Jira, Notion, Gmail, and Calendar, then delivers finished results: pull requests, drafted emails, filed tickets, written docs, and posted messages.
+Give it a task in plain English. It uses tools (shell, GitHub, Slack, files) to deliver finished work — PRs, docs, tickets, reports. Not chat. Results.
 
-OpenWorker runs on your desktop. AutoWorker runs in the cloud, 24/7, on [oncell](https://oncell.ai).
-
-## What it delivers
-
-| Task | Result |
-|------|--------|
-| "Fix the checkout bug from today's errors" | PR with tested fix, awaiting your approval |
-| "Write a weekly report from Slack activity" | Formatted doc in your workspace |
-| "Triage the 5 new GitHub issues" | Labels, priorities, and first responses posted |
-| "Draft an email to the client about the delay" | Email draft ready to review and send |
-| "Summarize #engineering from the last 24h" | Concise summary posted to #leadership |
-| "Review PR #42" | Detailed code review comment posted |
-
-**Not chat. Finished work.**
-
-## Quick Start
+Like [OpenWorker](https://github.com/andrewyng/openworker), but no desktop app. Just a CLI and an HTTP server.
 
 ```bash
-npm install oncell
-npx oncell deploy
+npx autoworker "Fix the checkout bug in myorg/app and open a PR"
 ```
 
-Set your secrets:
+## Install
 
 ```bash
-oncell secrets set GITHUB_TOKEN=ghp_...
-oncell secrets set SLACK_TOKEN=xoxb-...
-# Optional:
-oncell secrets set JIRA_TOKEN=...
-oncell secrets set NOTION_TOKEN=...
+npm install -g autoworker
+# or
+npx autoworker
 ```
 
-Configure:
+## Set your LLM key
 
-```typescript
-import { OnCell } from "@oncell/sdk";
-const oncell = new OnCell({ apiKey: "oncell_sk_..." });
+```bash
+# Pick one (Kimi K3 is the default, fast and cheap)
+export MOONSHOT_API_KEY=sk-...       # Kimi K3
+export ANTHROPIC_API_KEY=sk-ant-...  # Claude
+export OPENAI_API_KEY=sk-...         # OpenAI
 
-await oncell.agent("autoworker").run("configure", {
-  github_repos: ["yourorg/app", "yourorg/api"],
-  slack_channels: ["engineering", "alerts"],
-});
+# For GitHub operations
+export GITHUB_TOKEN=ghp_...
 ```
 
-## Usage
+## Use it
 
-### Natural language (chat)
+### Run a task
 
-```typescript
-// From your app, Slack, or the dashboard
-await oncell.agent("autoworker").run("do", {
-  task: "Fix the null pointer in checkout and open a PR"
-});
+```bash
+autoworker "Summarize the last 20 commits in myorg/app"
 ```
 
-### GitHub
+### Fix a GitHub issue
 
-```typescript
-// Fix an issue
-await oncell.agent("autoworker").run("github", {
-  action: "fix", repo: "yourorg/app",
-  issue: "Cart total is wrong when coupon is applied twice"
-});
-
-// Review a PR
-await oncell.agent("autoworker").run("github", {
-  action: "review", repo: "yourorg/app", issue: "42"
-});
-
-// Create an issue
-await oncell.agent("autoworker").run("github", {
-  action: "issue", repo: "yourorg/app",
-  title: "Checkout timeout on large carts",
-  body: "Users report 504 when cart has >20 items..."
-});
+```bash
+autoworker fix --repo myorg/app --issue "Cart total wrong when coupon applied twice"
 ```
 
-### Slack
+It clones the repo, reads the code, writes a fix, runs tests, and opens a PR. Asks for your approval before creating the PR.
 
-```typescript
-// Post a message (asks for approval first)
-await oncell.agent("autoworker").run("slack", {
-  action: "post", channel: "engineering",
-  message: "Deploy complete. All tests passing."
-});
+### Review a PR
 
-// Summarize a channel
-await oncell.agent("autoworker").run("slack", {
-  action: "summarize", channel: "alerts"
-});
+```bash
+autoworker review --repo myorg/app --pr 42
 ```
 
-### Email
+### Interactive mode
 
-```typescript
-// Draft an email
-await oncell.agent("autoworker").run("email", {
-  action: "draft",
-  to: "client@company.com",
-  subject: "Project update — Week 12"
-});
+```bash
+autoworker chat
+→ Read the README in myorg/api and write API docs
+→ Find all TODO comments in src/ and create GitHub issues for each
+→ Draft an email to the team about the v2 migration plan
 ```
 
-### Webhooks (auto-triggers)
+### Run as a server
 
-Set up GitHub webhook → `https://api.oncell.ai/agents/autoworker/webhook/github`
+```bash
+autoworker serve
 
-- **New PR** → auto-reviews with detailed comments
-- **New issue** → auto-triages, adds to pending queue
+# Then call it via HTTP
+curl -X POST http://localhost:4747/do \
+  -H "Content-Type: application/json" \
+  -d '{"task": "Fix the login timeout bug in myorg/app"}'
 
-Set up Slack webhook → `https://api.oncell.ai/agents/autoworker/webhook/slack`
+curl -X POST http://localhost:4747/github \
+  -H "Content-Type: application/json" \
+  -d '{"action": "review", "repo": "myorg/app", "issue": "42"}'
+```
 
-- **@AutoWorker** mention → executes the request, replies in thread
+## Managed hosting
 
-## Scheduled automations
+Don't want to run it yourself? Deploy on [chay.ai](https://chay.ai) — runs 24/7, $0 when idle.
 
-| Schedule | What it does |
-|----------|-------------|
-| **Daily 8am** | Morning brief: yesterday's completed tasks, pending items, what needs attention |
-| **Weekly Monday 9am** | Weekly report: completed, in progress, blocked — saved to files |
+```bash
+# Coming soon
+npx autoworker deploy --host chay.ai
+```
 
-## How it's different from OpenWorker
+## How it works
 
-| | OpenWorker | AutoWorker |
-|---|-----------|------------|
-| **Runs on** | Your desktop (Tauri app) | Cloud (oncell) — 24/7 |
-| **Always on** | Only when desktop is open | Yes, runs scheduled tasks while you sleep |
-| **Webhooks** | No | GitHub + Slack auto-triggers |
-| **Deploy** | Install desktop app | `npx oncell deploy` |
-| **State** | Local files | Durable memory + files (survives crashes) |
-| **Cost when idle** | Your laptop battery | $0 (auto-pauses) |
-| **Approval** | Desktop popup | Dashboard, API, or Slack |
-| **Multi-model** | Manual selection | Auto-switches per skill (opus for thinking, k3 for coding) |
-| **Scheduled tasks** | Yes | Yes, plus survives restarts |
-| **Open source** | MIT | Apache 2.0 |
+```
+You: "Fix the checkout bug in myorg/app"
+  │
+  ▼
+AutoWorker calls LLM with tools (shell, read_file, write_file, ask_human)
+  │
+  ├─ shell: gh repo clone myorg/app workspace
+  ├─ read_file: workspace/src/checkout.ts
+  ├─ LLM thinks about the bug...
+  ├─ write_file: workspace/src/checkout.ts (fixed)
+  ├─ shell: cd workspace && npm test
+  ├─ shell: cd workspace && git add -A && git commit -m "fix: ..."
+  ├─ shell: cd workspace && git push origin HEAD
+  ├─ ask_human: "Open PR for checkout fix?" → you approve
+  ├─ shell: cd workspace && gh pr create --title "fix: ..."
+  │
+  ▼
+Done. PR opened. You review and merge.
+```
+
+**Key:** it asks for approval (`ask_human`) before anything consequential.
 
 ## Models
 
-| Skill | Model | Why |
-|-------|-------|-----|
-| Planning & analysis | claude-opus | Deep reasoning for task breakdown |
-| Writing (docs, emails) | claude-opus | Professional quality output |
-| Coding | kimi-k3 | Fast, cheap code generation |
-| Research | kimi-k3 | Quick information gathering |
+| Model | Provider | Set with | Best for |
+|-------|----------|----------|----------|
+| `kimi-k3` | Moonshot | `MOONSHOT_API_KEY` | Default. Fast coding. |
+| `claude-sonnet` | Anthropic | `ANTHROPIC_API_KEY` | Balanced |
+| `claude-opus` | Anthropic | `ANTHROPIC_API_KEY` | Complex reasoning |
+| `gpt-4o` | OpenAI | `OPENAI_API_KEY` | Alternative |
 
-## Cost
+Switch models:
 
-- **Chat / do task**: $0.50-5.00 per task
-- **PR fix**: $2-5 per fix
-- **Morning brief**: ~$0.50/day
-- **Weekly report**: ~$1/week
-- **Waiting for approval**: $0
-- **Monthly estimate**: $30-100 for a typical team
-
-## Architecture
-
+```bash
+AUTOWORKER_MODEL=claude-opus autoworker "Design the new auth system"
 ```
-                  ┌─────────────────────────────┐
-                  │  AutoWorker (oncell agent)   │
-                  │  Runs 24/7, $0 when idle     │
-                  ├─────────────────────────────┤
-                  │  Skills:                     │
-                  │  • plan (claude-opus)        │
-                  │  • write (claude-opus)       │
-                  │  • code (kimi-k3)            │
-                  │  • research (kimi-k3)        │
-                  ├─────────────────────────────┤
-     ┌────────────┤  Integrations:              ├────────────┐
-     │            │  GitHub · Slack · Email      │            │
-     │            │  Jira · Notion · Calendar    │            │
-     │            └──────────┬──────────────────┘            │
-     │                       │                               │
-     ▼                       ▼                               ▼
-  Webhooks             Scheduled tasks               Chat / API
-  (auto-trigger)       (morning brief,               (on-demand
-  on PR, issue,         weekly report)                tasks)
-  @mention)
+
+## What it can do
+
+| Task | What happens |
+|------|-------------|
+| `"Fix the checkout bug"` | Clones, reads, fixes, tests, opens PR |
+| `"Review PR #42"` | Reads diff, posts detailed review |
+| `"Write API docs from the codebase"` | Reads code, generates docs, writes files |
+| `"Create issues for all TODOs in src/"` | Finds TODOs, creates GitHub issues |
+| `"Summarize #engineering Slack"` | Reads channel, posts summary |
+| `"Draft email about the delay"` | Writes email draft to a file |
+
+## Data
+
+All data stored locally in `.autoworker/autoworker.db` (SQLite). No cloud, no telemetry, no accounts. Delete the folder to reset.
+
+## API (programmatic use)
+
+```typescript
+import { runWorker } from "autoworker";
+
+const result = await runWorker("Fix the login bug in myorg/app", {
+  model: "kimi-k3",
+  maxSteps: 30,
+  onStep: (step, action) => console.log(`${step}: ${action}`),
+  onAskHuman: async (question) => "approved",
+});
+
+console.log(result.text);
 ```
 
 ## License
 
 Apache 2.0
 
-## Built on
+---
 
-[oncell](https://oncell.ai) — the cloud where AI agents live.
+**[chay.ai](https://chay.ai)** — managed AutoWorker. Always on, $0 when idle.

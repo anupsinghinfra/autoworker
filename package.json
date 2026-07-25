@@ -1,25 +1,32 @@
 {
   "name": "autoworker",
   "version": "0.1.0",
-  "description": "Your 24/7 AI employee. Like OpenWorker, but cloud-native. GitHub, Slack, Jira, Email — delivers finished work, not chat.",
-  "main": "agent.ts",
+  "description": "Your 24/7 AI employee. Connects to GitHub, Slack, Linear, Email. Delivers finished work — PRs, docs, tickets, reports.",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "autoworker": "./dist/cli.js"
+  },
   "scripts": {
-    "dev": "npx oncell dev",
-    "deploy": "npx oncell deploy"
+    "dev": "tsx src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "cli": "tsx src/cli.ts"
   },
   "keywords": [
-    "ai-agent",
-    "autonomous-worker",
-    "openworker",
-    "github-bot",
-    "slack-bot",
-    "ai-employee",
-    "oncell",
-    "devops",
-    "automation"
+    "ai-agent", "autonomous-worker", "openworker", "github-bot",
+    "slack-bot", "ai-employee", "devops", "automation", "llm"
   ],
   "license": "Apache-2.0",
   "dependencies": {
-    "oncell": "latest"
+    "better-sqlite3": "^11.0.0",
+    "hono": "^4.0.0",
+    "@hono/node-server": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.0",
+    "@types/node": "^22.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.5"
   }
 }
