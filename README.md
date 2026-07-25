@@ -89,52 +89,20 @@ Pokios only cost when working. **$0 when idle.** Typical engineer Pokio: ~$3-5/d
 
 ---
 
-## Open source
+## Run locally
 
-Pokio is fully open source (Apache 2.0). You can self-host it or use [pokio.ai](https://pokio.ai) for managed hosting.
-
-### Self-host
+Pokio is fully open source. Run it yourself with just an oncell API key:
 
 ```bash
 git clone https://github.com/anupsinghinfra/pokio.ai
 cd pokio.ai
 npm install
 
-# Set your LLM key
-export MOONSHOT_API_KEY=sk-...   # or ANTHROPIC_API_KEY
-
-# Set GitHub access
-export GITHUB_TOKEN=ghp_...
-
-# Run
+export ONCELL_API_KEY=oncell_sk_...   # get at oncell.ai
 npm run dev
 ```
 
-### Architecture
-
-```
-pokio.ai (managed)              self-hosted
-    │                               │
-    ▼                               ▼
-┌──────────┐                 ┌──────────┐
-│ pokio.ai │                 │ your     │
-│ dashboard│                 │ server   │
-└────┬─────┘                 └────┬─────┘
-     │                            │
-     ▼                            ▼
-  oncell cloud                 this repo
-  (runs it for you)            (you run it)
-     │                            │
-     ▼                            ▼
-  Watchers → LLM → Tools → Ask human → Act
-```
-
-### Tech stack
-
-- **Runtime:** Node.js + TypeScript
-- **LLM:** Multi-provider (Kimi K3, Claude, OpenAI — bring your own key)
-- **State:** Local SQLite (self-hosted) or oncell (managed)
-- **Tools:** Shell, GitHub (gh CLI), file read/write, human approval
+Everything runs on [oncell](https://oncell.ai) — compute, state, LLM, durability. One key, everything works.
 
 ---
 
@@ -144,18 +112,18 @@ pokio.ai (managed)              self-hosted
 Those are coding assistants you prompt. Pokio works autonomously 24/7 — you don't assign work, it finds work by watching your repos and logs. You just approve.
 
 **Is my code safe?**
-Pokio runs in isolated sandboxes. It never pushes to main — always opens PRs for your review. Self-host if you need full control.
+Pokio runs in isolated gVisor sandboxes on oncell. It never pushes to main — always opens PRs for your review.
 
 **What LLMs does it support?**
-Kimi K3 (default, fast & cheap), Claude (Anthropic), OpenAI, or any OpenAI-compatible provider. Bring your own API key.
+Kimi K3 (default), Claude, OpenAI — configured through oncell. Bring your own key or use oncell's built-in LLM gateway.
 
 **What if I don't approve?**
-Pokio waits. Costs $0 while waiting. No timeout. It'll wait until you approve or deny.
+Pokio waits. Costs $0 while waiting. No timeout.
 
 ---
 
 ## License
 
-Apache 2.0
+MIT
 
 **[pokio.ai](https://pokio.ai)** — Hire AI employees that work 24/7.

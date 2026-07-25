@@ -17,7 +17,7 @@
     "ai-agent", "autonomous-worker", "openworker", "github-bot",
     "slack-bot", "ai-employee", "devops", "automation", "llm"
   ],
-  "license": "Apache-2.0",
+  "license": "MIT",
   "dependencies": {
     "better-sqlite3": "^11.0.0",
     "hono": "^4.0.0",
