@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pokio — Hire AI employees that work 24/7</title>
+  <meta name="description" content="Hire AI engineers, support agents, and researchers. They watch your repos, fix bugs, answer tickets, write reports. You just approve. $0 when idle.">
+  <meta name="keywords" content="AI employee, AI engineer, autonomous agent, AI support agent, hire AI, 24/7 AI worker, pokio">
+  <meta property="og:title" content="Pokio — Hire AI employees that work 24/7">
+  <meta property="og:description" content="AI engineers, support agents, researchers. They work while you sleep. You just approve.">
+  <meta property="og:url" content="https://pokio.ai">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Pokio — Hire AI employees that work 24/7">
+  <meta name="twitter:description" content="Hire AI engineers that watch your repos, fix bugs, open PRs. $0 when idle.">
+  <link rel="canonical" href="https://pokio.ai">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0a0a0a;
+      --text: #e8e4de;
+      --dim: rgba(232,228,222,0.4);
+      --muted: rgba(232,228,222,0.15);
+      --border: rgba(232,228,222,0.06);
+      --accent: #10b981;
+      --amber: #e8a849;
+      --mono: "SF Mono", "Consolas", "Monaco", monospace;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: -apple-system, system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: inherit; text-decoration: none; }
+
+    /* Nav */
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; height: 48px; border-bottom: 1px solid var(--border); background: rgba(9,9,9,0.92); backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em; }
+    nav .logo { color: var(--accent); font-weight: 600; font-size: 14px; }
+    nav .cta { background: var(--accent); color: #0a0a0a; padding: 8px 20px; font-weight: 700; border-radius: 6px; font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em; }
+
+    /* Hero */
+    .hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 120px 40px 80px; text-align: center; }
+    .hero h1 { font-size: clamp(36px, 6vw, 64px); font-weight: 300; line-height: 1.1; letter-spacing: -0.03em; margin-bottom: 24px; }
+    .hero h1 span { color: var(--accent); }
+    .hero p { font-size: 18px; color: var(--dim); line-height: 1.7; max-width: 520px; margin: 0 auto 40px; }
+    .hero .buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .btn-primary { background: var(--accent); color: #0a0a0a; padding: 14px 32px; font-family: var(--mono); font-size: 14px; font-weight: 700; letter-spacing: 0.06em; border-radius: 8px; }
+    .btn-ghost { border: 1px solid rgba(232,228,222,0.1); color: var(--dim); padding: 14px 32px; font-family: var(--mono); font-size: 14px; border-radius: 8px; }
+
+    /* Sections */
+    section { max-width: 900px; margin: 0 auto; padding: 0 40px 120px; }
+    .label { font-family: var(--mono); font-size: 11px; color: var(--accent); letter-spacing: 0.12em; margin-bottom: 16px; }
+    h2 { font-size: 32px; font-weight: 300; line-height: 1.3; margin-bottom: 40px; }
+
+    /* Roles grid */
+    .roles { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+    .role { background: #111; border: 1px solid var(--border); border-radius: 12px; padding: 28px; transition: border-color 0.3s; }
+    .role:hover { border-color: rgba(16,185,129,0.3); }
+    .role h3 { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+    .role p { font-size: 14px; color: var(--dim); line-height: 1.6; margin-bottom: 16px; }
+    .role .watches { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+
+    /* Dashboard preview */
+    .dash { background: #111; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; font-family: var(--mono); font-size: 13px; }
+    .dash-header { background: rgba(30,30,30,0.9); padding: 12px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+    .dash-header .dot { width: 8px; height: 8px; border-radius: 50%; }
+    .dash-header .green { background: #22c55e; }
+    .dash-header .amber { background: #f59e0b; }
+    .dash-body { padding: 20px; }
+    .pokio-row { display: flex; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--border); }
+    .pokio-row:last-child { border-bottom: none; }
+    .pokio-status { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .pokio-name { font-weight: 600; min-width: 80px; }
+    .pokio-role { color: var(--dim); min-width: 100px; }
+    .pokio-action { color: rgba(232,228,222,0.3); flex: 1; font-size: 12px; }
+    .pokio-cost { color: var(--accent); font-size: 12px; }
+    .approve-btn { background: var(--accent); color: #0a0a0a; padding: 4px 12px; border-radius: 4px; font-size: 11px; font-weight: 700; border: none; cursor: pointer; margin-left: 8px; }
+
+    /* How it works */
+    .steps { display: flex; flex-direction: column; gap: 24px; max-width: 600px; }
+    .step { display: flex; gap: 16px; align-items: flex-start; }
+    .step-num { font-family: var(--mono); font-size: 13px; color: var(--accent); font-weight: 700; flex-shrink: 0; width: 28px; }
+    .step-text { font-size: 16px; color: rgba(232,228,222,0.7); line-height: 1.6; }
+    .step-text strong { color: var(--text); }
+
+    /* Pricing */
+    .pricing { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+    .price-card { background: #111; border: 1px solid var(--border); border-radius: 12px; padding: 28px; text-align: center; }
+    .price-card.featured { border-color: rgba(16,185,129,0.3); }
+    .price-card h3 { font-size: 16px; margin-bottom: 8px; }
+    .price-card .price { font-size: 32px; font-weight: 300; color: var(--accent); margin-bottom: 4px; }
+    .price-card .unit { font-size: 13px; color: var(--dim); margin-bottom: 16px; }
+    .price-card .features { font-size: 13px; color: var(--dim); line-height: 2; text-align: left; }
+
+    /* Footer */
+    footer { border-top: 1px solid var(--border); max-width: 900px; margin: 0 auto; padding: 40px; }
+    footer .row { display: flex; align-items: center; gap: 12px; font-family: var(--mono); font-size: 12px; color: var(--muted); }
+
+    /* CTA */
+    .final-cta { text-align: center; padding: 80px 40px; }
+    .final-cta h2 { font-size: clamp(28px, 4vw, 48px); font-weight: 300; margin-bottom: 16px; }
+    .final-cta p { color: var(--dim); margin-bottom: 32px; font-size: 16px; }
+  </style>
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav>
+    <span class="logo">pokio</span>
+    <div style="display:flex;gap:16px;align-items:center;">
+      <a href="#how" style="color:var(--dim)">HOW IT WORKS</a>
+      <a href="#pricing" style="color:var(--dim)">PRICING</a>
+      <a href="#signup" class="cta">HIRE YOUR FIRST POKIO</a>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div>
+      <h1>Hire AI employees<br>that <span>work 24/7.</span></h1>
+      <p>Engineers, support agents, researchers. They watch your repos, fix bugs, answer tickets, write reports. You just approve.</p>
+      <div class="buttons">
+        <a href="#signup" class="btn-primary">HIRE YOUR FIRST POKIO</a>
+        <a href="#how" class="btn-ghost">SEE HOW IT WORKS</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Roles -->
+  <section>
+    <div class="label">ROLES</div>
+    <h2>Hire for any role. They start working immediately.</h2>
+    <div class="roles">
+      <div class="role">
+        <h3>Engineer</h3>
+        <p>Watches repos. Triages issues. Writes fixes. Runs tests. Opens PRs. Reviews code.</p>
+        <div class="watches">Watches: GitHub repos, error logs</div>
+      </div>
+      <div class="role">
+        <h3>Support Agent</h3>
+        <p>Answers customer tickets. Searches knowledge base. Escalates when stuck. Follows up.</p>
+        <div class="watches">Watches: Zendesk, Intercom, Slack</div>
+      </div>
+      <div class="role">
+        <h3>Researcher</h3>
+        <p>Monitors competitors. Reads industry news. Writes weekly reports. Spots opportunities.</p>
+        <div class="watches">Watches: RSS feeds, web, news</div>
+      </div>
+      <div class="role">
+        <h3>Ops / DevOps</h3>
+        <p>Monitors alerts. Diagnoses incidents. Writes runbooks. Deploys fixes. Pages humans for critical issues.</p>
+        <div class="watches">Watches: CloudWatch, PagerDuty, logs</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Dashboard preview -->
+  <section>
+    <div class="label">DASHBOARD</div>
+    <h2>Your AI team at a glance.</h2>
+    <div class="dash">
+      <div class="dash-header">
+        <span style="color:var(--accent);font-weight:600;">Your Team</span>
+        <span style="color:var(--dim);margin-left:auto;">3 Pokios &middot; $5.70 today</span>
+      </div>
+      <div class="dash-body">
+        <div class="pokio-row">
+          <div class="pokio-status green"></div>
+          <div class="pokio-name">Alex</div>
+          <div class="pokio-role" style="color:var(--amber)">Engineer</div>
+          <div class="pokio-action">Fixed #47, opened PR #48</div>
+          <div class="pokio-cost">$4.20</div>
+        </div>
+        <div class="pokio-row">
+          <div class="pokio-status amber"></div>
+          <div class="pokio-name">Sam</div>
+          <div class="pokio-role" style="color:var(--amber)">Support</div>
+          <div class="pokio-action">
+            ⏸ "Refund $200 for order #123?"
+            <button class="approve-btn">Approve</button>
+          </div>
+          <div class="pokio-cost">$1.50</div>
+        </div>
+        <div class="pokio-row">
+          <div class="pokio-status green"></div>
+          <div class="pokio-name">Jordan</div>
+          <div class="pokio-role" style="color:var(--amber)">Researcher</div>
+          <div class="pokio-action">Weekly report generated</div>
+          <div class="pokio-cost">$0.00</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section id="how">
+    <div class="label">HOW IT WORKS</div>
+    <h2>Three clicks. Your AI employee starts working.</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-text"><strong>Pick a role.</strong> Engineer, support, researcher, or ops. Each comes with the right skills and tools.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-text"><strong>Connect your tools.</strong> GitHub, Slack, Zendesk, Linear — one-click OAuth. Your Pokio gets read/write access.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-text"><strong>Choose what to watch.</strong> Pick repos, channels, log groups. Your Pokio starts monitoring immediately.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <div class="step-text"><strong>Approve when asked.</strong> Your Pokio asks before anything consequential — merging PRs, sending emails, refunding customers. Approve from the dashboard or Slack.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- What happens while you sleep -->
+  <section>
+    <div class="label">WHILE YOU SLEEP</div>
+    <h2>You wake up to this.</h2>
+    <div class="dash" style="max-width:600px;">
+      <div class="dash-header">
+        <span style="color:var(--accent);font-weight:600;">Alex</span>
+        <span style="color:var(--dim);">&middot; Engineer &middot; overnight activity</span>
+      </div>
+      <div class="dash-body" style="font-size:13px;color:var(--dim);line-height:2.2;">
+        <div><span style="color:var(--muted)">2:14 AM</span> &nbsp; New issue #51: "Timeout on /api/search"</div>
+        <div><span style="color:var(--muted)">2:15 AM</span> &nbsp; Cloned repo, reading src/search.ts</div>
+        <div><span style="color:var(--muted)">2:18 AM</span> &nbsp; Root cause: missing pagination, full table scan</div>
+        <div><span style="color:var(--muted)">2:22 AM</span> &nbsp; Fixed, added test, all tests passing</div>
+        <div><span style="color:var(--muted)">2:23 AM</span> &nbsp; Opened PR #52 &nbsp;<span style="color:var(--accent);">⏸ awaiting approval</span></div>
+        <div><span style="color:var(--muted)">2:23 AM</span> &nbsp; Idle. $0/hr.</div>
+        <div style="margin-top:12px;"><button class="approve-btn" style="font-size:13px;padding:8px 20px;">Approve & merge PR #52</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section id="pricing">
+    <div class="label">PRICING</div>
+    <h2>Pay only when they're working. $0 when idle.</h2>
+    <div class="pricing">
+      <div class="price-card">
+        <h3>Starter</h3>
+        <div class="price">$0</div>
+        <div class="unit">1 Pokio, 100 actions/mo</div>
+        <div class="features">
+          ✓ 1 AI employee<br>
+          ✓ GitHub + Slack<br>
+          ✓ Dashboard<br>
+          ✓ $0 when idle
+        </div>
+      </div>
+      <div class="price-card featured">
+        <h3>Team</h3>
+        <div class="price">$49<span style="font-size:16px">/mo</span></div>
+        <div class="unit">5 Pokios, 2k actions/mo</div>
+        <div class="features">
+          ✓ 5 AI employees<br>
+          ✓ All integrations<br>
+          ✓ Priority support<br>
+          ✓ Approval via Slack
+        </div>
+      </div>
+      <div class="price-card">
+        <h3>Company</h3>
+        <div class="price">$199<span style="font-size:16px">/mo</span></div>
+        <div class="unit">Unlimited Pokios</div>
+        <div class="features">
+          ✓ Unlimited employees<br>
+          ✓ SSO / audit log<br>
+          ✓ Custom roles<br>
+          ✓ Dedicated support
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Final CTA -->
+  <div class="final-cta" id="signup">
+    <h2>Hire your first AI employee.</h2>
+    <p>Free to start. No credit card required.</p>
+    <a href="https://app.pokio.ai/signup" class="btn-primary" style="font-size:16px;padding:16px 40px;">GET STARTED FREE</a>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="row">
+      <span style="color:var(--accent);font-weight:600;">pokio</span>
+      <span>&copy; 2026</span>
+      <span>|</span>
+      <a href="https://github.com/anupsinghinfra/autoworker">GitHub</a>
+      <a href="mailto:hello@pokio.ai">Contact</a>
+    </div>
+  </footer>
+
+</body>
+</html>
