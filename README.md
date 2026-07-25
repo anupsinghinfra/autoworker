@@ -1,157 +1,187 @@
 # AutoWorker
 
-**Your AI employee. Runs locally or on [chay.ai](https://chay.ai).**
-
-Give it a task in plain English. It uses tools (shell, GitHub, Slack, files) to deliver finished work — PRs, docs, tickets, reports. Not chat. Results.
-
-Like [OpenWorker](https://github.com/andrewyng/openworker), but no desktop app. Just a CLI and an HTTP server.
+**AI employee that works 24/7. Watches your repos and logs, finds issues, fixes them, opens PRs. You just approve.**
 
 ```bash
-npx autoworker "Fix the checkout bug in myorg/app and open a PR"
+autoworker watch --github myorg/app --github myorg/api
 ```
+
+That's it. It runs forever. Checks your repos every 10 minutes. When it finds a new issue, it reads the code, writes a fix, runs tests, and opens a PR. It asks you before merging. You approve from your terminal, or ignore and it waits.
+
+Like [OpenWorker](https://github.com/andrewyng/openworker), but no desktop app. Runs anywhere — your server, a VM, or [chay.ai](https://chay.ai).
 
 ## Install
 
 ```bash
 npm install -g autoworker
-# or
-npx autoworker
 ```
 
-## Set your LLM key
+## Setup
 
 ```bash
-# Pick one (Kimi K3 is the default, fast and cheap)
-export MOONSHOT_API_KEY=sk-...       # Kimi K3
-export ANTHROPIC_API_KEY=sk-ant-...  # Claude
-export OPENAI_API_KEY=sk-...         # OpenAI
+# Pick your LLM (Kimi K3 is default — fast and cheap)
+export MOONSHOT_API_KEY=sk-...       # or ANTHROPIC_API_KEY or OPENAI_API_KEY
 
-# For GitHub operations
+# GitHub access
 export GITHUB_TOKEN=ghp_...
 ```
 
-## Use it
-
-### Run a task
+## Run 24/7
 
 ```bash
-autoworker "Summarize the last 20 commits in myorg/app"
+# Watch one repo
+autoworker watch --github myorg/app
+
+# Watch multiple repos
+autoworker watch --github myorg/app --github myorg/api --github myorg/web
+
+# Watch repos + production logs
+autoworker watch --github myorg/app --logs "docker logs myapp --since 1h"
+
+# Custom check interval (default: 10 min)
+autoworker watch --github myorg/app --interval 5
 ```
 
-### Fix a GitHub issue
+### What it does automatically
 
-```bash
-autoworker fix --repo myorg/app --issue "Cart total wrong when coupon applied twice"
+| Source | What it watches | What it does |
+|--------|----------------|-------------|
+| **GitHub issues** | New issues opened | Reads code, attempts fix, opens PR |
+| **GitHub PRs** | New PRs opened | Posts detailed code review |
+| **Logs** | Errors in output | Diagnoses root cause, fixes if possible |
+
+### Approval flow
+
+AutoWorker **never** pushes to main or merges without asking:
+
+```
+[watcher] New issue: myorg/app#47 — "Checkout fails with > 10 items"
+  [issue:47] step 1: shell(gh repo clone myorg/app workspace)
+  [issue:47] step 2: read_file(workspace/src/checkout.ts)
+  [issue:47] step 3: write_file(workspace/src/checkout.ts)
+  [issue:47] step 4: shell(cd workspace && npm test)
+  [issue:47] step 5: shell(cd workspace && git add -A && git commit ...)
+
+  ⏸ Open PR to fix checkout overflow? [y/n]: y
+
+  [issue:47] step 6: shell(cd workspace && gh pr create ...)
+  ✓ PR #48 opened
 ```
 
-It clones the repo, reads the code, writes a fix, runs tests, and opens a PR. Asks for your approval before creating the PR.
-
-### Review a PR
+You can also run it non-interactively (auto-approves):
 
 ```bash
+autoworker watch --github myorg/app &  # background, auto-approves
+```
+
+## One-shot mode
+
+Don't want 24/7? Just run one task:
+
+```bash
+autoworker "Fix the login timeout bug in myorg/app"
+autoworker fix --repo myorg/app --issue "Cart total wrong"
 autoworker review --repo myorg/app --pr 42
 ```
 
-### Interactive mode
+## Interactive mode
 
 ```bash
 autoworker chat
-→ Read the README in myorg/api and write API docs
-→ Find all TODO comments in src/ and create GitHub issues for each
-→ Draft an email to the team about the v2 migration plan
+→ Summarize the last 20 commits in myorg/app
+→ Find all TODO comments and create GitHub issues
+→ Write API docs from the codebase
 ```
 
-### Run as a server
+## HTTP server
 
 ```bash
-autoworker serve
+autoworker serve  # → http://localhost:4747
 
-# Then call it via HTTP
 curl -X POST http://localhost:4747/do \
-  -H "Content-Type: application/json" \
-  -d '{"task": "Fix the login timeout bug in myorg/app"}'
+  -d '{"task": "Fix the login bug in myorg/app"}'
 
 curl -X POST http://localhost:4747/github \
-  -H "Content-Type: application/json" \
-  -d '{"action": "review", "repo": "myorg/app", "issue": "42"}'
+  -d '{"action": "fix", "repo": "myorg/app", "issue": "Cart bug"}'
 ```
 
 ## Managed hosting
 
-Don't want to run it yourself? Deploy on [chay.ai](https://chay.ai) — runs 24/7, $0 when idle.
+Run on [chay.ai](https://chay.ai) — always on, $0 when idle, no server to manage.
 
 ```bash
-# Coming soon
-npx autoworker deploy --host chay.ai
+autoworker deploy --host chay.ai  # coming soon
 ```
 
 ## How it works
 
 ```
-You: "Fix the checkout bug in myorg/app"
-  │
-  ▼
-AutoWorker calls LLM with tools (shell, read_file, write_file, ask_human)
-  │
-  ├─ shell: gh repo clone myorg/app workspace
-  ├─ read_file: workspace/src/checkout.ts
-  ├─ LLM thinks about the bug...
-  ├─ write_file: workspace/src/checkout.ts (fixed)
-  ├─ shell: cd workspace && npm test
-  ├─ shell: cd workspace && git add -A && git commit -m "fix: ..."
-  ├─ shell: cd workspace && git push origin HEAD
-  ├─ ask_human: "Open PR for checkout fix?" → you approve
-  ├─ shell: cd workspace && gh pr create --title "fix: ..."
-  │
-  ▼
-Done. PR opened. You review and merge.
+autoworker watch --github myorg/app
+        │
+        │  every 10 min
+        ▼
+┌─────────────────────────┐
+│  Check for new issues   │ ← gh issue list
+│  Check for new PRs      │ ← gh pr list
+│  Check logs for errors  │ ← your log command
+└────────┬────────────────┘
+         │ found something new
+         ▼
+┌─────────────────────────┐
+│  LLM + tools loop       │
+│  • shell (git, gh, npm) │
+│  • read_file / write    │
+│  • ask_human            │
+└────────┬────────────────┘
+         │ asks for approval
+         ▼
+┌─────────────────────────┐
+│  Human approves (y/n)   │
+│  or auto-approves       │
+└────────┬────────────────┘
+         │
+         ▼
+    PR opened / review posted / issue commented
 ```
-
-**Key:** it asks for approval (`ask_human`) before anything consequential.
 
 ## Models
 
-| Model | Provider | Set with | Best for |
-|-------|----------|----------|----------|
-| `kimi-k3` | Moonshot | `MOONSHOT_API_KEY` | Default. Fast coding. |
-| `claude-sonnet` | Anthropic | `ANTHROPIC_API_KEY` | Balanced |
-| `claude-opus` | Anthropic | `ANTHROPIC_API_KEY` | Complex reasoning |
-| `gpt-4o` | OpenAI | `OPENAI_API_KEY` | Alternative |
-
-Switch models:
-
 ```bash
-AUTOWORKER_MODEL=claude-opus autoworker "Design the new auth system"
+# Default (fast, cheap)
+autoworker watch --github myorg/app
+
+# Use Claude for complex reasoning
+AUTOWORKER_MODEL=claude-opus autoworker watch --github myorg/app
+
+# Use per-task
+autoworker "Design the new auth system"  # uses default
+AUTOWORKER_MODEL=claude-opus autoworker "Design the new auth system"  # uses opus
 ```
-
-## What it can do
-
-| Task | What happens |
-|------|-------------|
-| `"Fix the checkout bug"` | Clones, reads, fixes, tests, opens PR |
-| `"Review PR #42"` | Reads diff, posts detailed review |
-| `"Write API docs from the codebase"` | Reads code, generates docs, writes files |
-| `"Create issues for all TODOs in src/"` | Finds TODOs, creates GitHub issues |
-| `"Summarize #engineering Slack"` | Reads channel, posts summary |
-| `"Draft email about the delay"` | Writes email draft to a file |
 
 ## Data
 
-All data stored locally in `.autoworker/autoworker.db` (SQLite). No cloud, no telemetry, no accounts. Delete the folder to reset.
+All local. SQLite in `.autoworker/`. No cloud, no telemetry. Delete the folder to reset.
 
-## API (programmatic use)
+```
+.autoworker/
+└── autoworker.db    # tasks, steps, seen items, config
+```
+
+## Programmatic API
 
 ```typescript
-import { runWorker } from "autoworker";
+import { runWorker, startWatchers } from "autoworker";
 
-const result = await runWorker("Fix the login bug in myorg/app", {
-  model: "kimi-k3",
-  maxSteps: 30,
-  onStep: (step, action) => console.log(`${step}: ${action}`),
-  onAskHuman: async (question) => "approved",
+// One-shot
+const result = await runWorker("Fix the bug", {
+  onAskHuman: async (q) => "approved",
 });
 
-console.log(result.text);
+// 24/7 autonomous
+await startWatchers(
+  { github: { repos: ["myorg/app"], watch: ["issues", "prs"] } },
+  async (question) => "approved",
+);
 ```
 
 ## License

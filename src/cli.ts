@@ -2,16 +2,25 @@
 /**
  * AutoWorker CLI
  *
- * Usage:
+ * Autonomous mode (24/7):
+ *   autoworker watch --github myorg/app --github myorg/api
+ *   autoworker watch --logs "docker logs myapp --since 1h"
+ *
+ * One-shot mode:
  *   autoworker "Fix the checkout bug"
+ *   autoworker fix --repo myorg/app --issue "Cart total wrong"
+ *   autoworker review --repo myorg/app --pr 42
+ *
+ * Server mode:
  *   autoworker serve
- *   autoworker fix --repo yourorg/app --issue "Cart total wrong"
- *   autoworker review --repo yourorg/app --pr 42
- *   autoworker status
+ *
+ * Interactive:
+ *   autoworker chat
  */
 
 import { runWorker } from "./worker.js";
 import { startServer } from "./server.js";
+import { startWatchers, type WatcherConfig } from "./watchers.js";
 import * as readline from "node:readline";
 
 const args = process.argv.slice(2);
@@ -21,28 +30,88 @@ if (!command || command === "--help" || command === "-h") {
   console.log(`
   autoworker — your 24/7 AI employee
 
-  Usage:
-    autoworker "Fix the login timeout bug"     Run a task
-    autoworker serve                            Start HTTP server
-    autoworker fix --repo org/app --issue "…"   Fix a GitHub issue
-    autoworker review --repo org/app --pr 42    Review a PR
-    autoworker status                           Show recent tasks
-    autoworker chat                             Interactive mode
+  Autonomous (runs forever, finds its own work):
+    autoworker watch --github myorg/app          Watch repo for issues + PRs
+    autoworker watch --github myorg/app \\
+                     --github myorg/api \\
+                     --logs "docker logs app"    Watch repos + logs
+
+  One-shot (do one task):
+    autoworker "Fix the login timeout bug"       Run a task
+    autoworker fix --repo org/app --issue "…"    Fix a GitHub issue
+    autoworker review --repo org/app --pr 42     Review a PR
+
+  Server:
+    autoworker serve                             HTTP API on :4747
+
+  Interactive:
+    autoworker chat                              REPL mode
 
   Environment:
     MOONSHOT_API_KEY      Kimi K3 (default model)
-    ANTHROPIC_API_KEY     Claude (for complex reasoning)
-    OPENAI_API_KEY        OpenAI (alternative)
+    ANTHROPIC_API_KEY     Claude
+    OPENAI_API_KEY        OpenAI
     GITHUB_TOKEN          GitHub access (gh CLI)
     AUTOWORKER_MODEL      Default model (kimi-k3)
-    AUTOWORKER_DATA       Data directory (.autoworker)
   `);
   process.exit(0);
 }
 
+// ─── watch (autonomous 24/7 mode) ────────────────────────────────────────
+
+if (command === "watch") {
+  const config: WatcherConfig = { github: { repos: [], watch: ["issues", "prs"] } };
+
+  // Parse --github flags
+  for (let i = 1; i < args.length; i++) {
+    if (args[i] === "--github" && args[i + 1]) {
+      config.github!.repos.push(args[++i]);
+    }
+    if (args[i] === "--logs" && args[i + 1]) {
+      config.logs = { cmd: args[++i] };
+    }
+    if (args[i] === "--interval" && args[i + 1]) {
+      const mins = parseInt(args[++i]);
+      if (config.github) config.github.interval_minutes = mins;
+      if (config.logs) config.logs.interval_minutes = mins;
+    }
+    if (args[i] === "--watch" && args[i + 1]) {
+      config.github!.watch = args[++i].split(",") as any;
+    }
+  }
+
+  if (config.github!.repos.length === 0 && !config.logs) {
+    console.error("Specify at least one source: --github org/repo or --logs \"command\"");
+    process.exit(1);
+  }
+
+  // In terminal: ask human via stdin. In production: queue approvals.
+  const isTTY = process.stdin.isTTY;
+
+  const onAskHuman = isTTY
+    ? async (question: string): Promise<string> => {
+        return new Promise((resolve) => {
+          const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+          rl.question(`\n  ⏸ ${question} [y/n]: `, (answer) => {
+            rl.close();
+            resolve(answer.toLowerCase().startsWith("y") ? "approved" : "denied");
+          });
+        });
+      }
+    : async (question: string): Promise<string> => {
+        console.log(`  ⏸ AUTO-APPROVED (non-interactive): ${question}`);
+        return "approved";
+      };
+
+  await startWatchers(config, onAskHuman);
+
+  // Keep process alive
+  await new Promise(() => {});
+}
+
 // ─── serve ───────────────────────────────────────────────────────────────
 
-if (command === "serve") {
+else if (command === "serve") {
   const port = parseInt(getFlag("--port") || "4747");
   startServer(port);
 }
@@ -56,10 +125,10 @@ else if (command === "status") {
   ).all() as any[];
 
   if (tasks.length === 0) {
-    console.log("No tasks yet. Run: autoworker \"Fix the bug\"");
+    console.log("No tasks yet. Run: autoworker watch --github myorg/app");
   } else {
     for (const t of tasks) {
-      console.log(`  ${t.status === "completed" ? "✓" : "…"} ${t.task.slice(0, 60)} (${t.status})`);
+      console.log(`  ${t.status === "completed" ? "✓" : "…"} ${t.task.slice(0, 70)} (${t.status})`);
     }
   }
 }
@@ -70,7 +139,6 @@ else if (command === "fix") {
   const repo = getFlag("--repo");
   const issue = getFlag("--issue");
   if (!repo || !issue) { console.error("Usage: autoworker fix --repo org/app --issue \"…\""); process.exit(1); }
-
   await run(`Clone https://github.com/${repo}. Fix: ${issue}. Run tests. Open a PR with gh CLI.`);
 }
 
@@ -80,7 +148,6 @@ else if (command === "review") {
   const repo = getFlag("--repo");
   const pr = getFlag("--pr");
   if (!repo || !pr) { console.error("Usage: autoworker review --repo org/app --pr 42"); process.exit(1); }
-
   await run(`Review PR #${pr} in ${repo}. Run: gh pr diff ${pr} --repo ${repo}. Post detailed review.`);
 }
 
@@ -103,8 +170,7 @@ else if (command === "chat") {
 // ─── default: run a task ─────────────────────────────────────────────────
 
 else {
-  const task = args.join(" ");
-  await run(task);
+  await run(args.join(" "));
 }
 
 // ─── helpers ─────────────────────────────────────────────────────────────
