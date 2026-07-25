@@ -8,7 +8,7 @@ autoworker watch --github myorg/app --github myorg/api
 
 That's it. It runs forever. Checks your repos every 10 minutes. When it finds a new issue, it reads the code, writes a fix, runs tests, and opens a PR. It asks you before merging. You approve from your terminal, or ignore and it waits.
 
-Like [OpenWorker](https://github.com/andrewyng/openworker), but no desktop app. Runs anywhere — your server, a VM, or [chay.ai](https://chay.ai).
+Like [OpenWorker](https://github.com/andrewyng/openworker), but no desktop app. Runs anywhere — your server, a VM, or [pokio.ai](https://pokio.ai).
 
 ## Install
 
@@ -107,10 +107,10 @@ curl -X POST http://localhost:4747/github \
 
 ## Managed hosting
 
-Run on [chay.ai](https://chay.ai) — always on, $0 when idle, no server to manage.
+Run on [pokio.ai](https://pokio.ai) — always on, $0 when idle, no server to manage.
 
 ```bash
-autoworker deploy --host chay.ai  # coming soon
+autoworker deploy --host pokio.ai  # coming soon
 ```
 
 ## How it works
@@ -190,4 +190,4 @@ Apache 2.0
 
 ---
 
-**[chay.ai](https://chay.ai)** — managed AutoWorker. Always on, $0 when idle.
+**[pokio.ai](https://pokio.ai)** — managed AutoWorker. Always on, $0 when idle.
