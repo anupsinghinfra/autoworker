@@ -1,0 +1,25 @@
+{
+  "name": "autoworker",
+  "version": "0.1.0",
+  "description": "Your 24/7 AI employee. Like OpenWorker, but cloud-native. GitHub, Slack, Jira, Email — delivers finished work, not chat.",
+  "main": "agent.ts",
+  "scripts": {
+    "dev": "npx oncell dev",
+    "deploy": "npx oncell deploy"
+  },
+  "keywords": [
+    "ai-agent",
+    "autonomous-worker",
+    "openworker",
+    "github-bot",
+    "slack-bot",
+    "ai-employee",
+    "oncell",
+    "devops",
+    "automation"
+  ],
+  "license": "Apache-2.0",
+  "dependencies": {
+    "oncell": "latest"
+  }
+}
