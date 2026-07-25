@@ -12,10 +12,10 @@ let _db: Database.Database | null = null;
 export function db(): Database.Database {
   if (_db) return _db;
 
-  const dir = process.env.AUTOWORKER_DATA || join(process.cwd(), ".autoworker");
+  const dir = process.env.POKIO_DATA || join(process.cwd(), ".pokio");
   mkdirSync(dir, { recursive: true });
 
-  _db = new Database(join(dir, "autoworker.db"));
+  _db = new Database(join(dir, "pokio.db"));
   _db.pragma("journal_mode = WAL");
 
   _db.exec(`

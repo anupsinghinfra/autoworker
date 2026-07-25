@@ -172,7 +172,7 @@ export async function startWatchers(
   // Ensure seen table exists
   db().exec("CREATE TABLE IF NOT EXISTS seen (key TEXT PRIMARY KEY, ts TEXT)");
 
-  console.log("\n  autoworker — running 24/7\n");
+  console.log("\n  pokio — running 24/7\n");
 
   if (config.github) {
     console.log(`  watching: ${config.github.repos.join(", ")} (${config.github.watch.join(", ")})`);

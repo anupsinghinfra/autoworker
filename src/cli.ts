@@ -1,21 +1,21 @@
 #!/usr/bin/env node
 /**
- * AutoWorker CLI
+ * Pokio CLI
  *
  * Autonomous mode (24/7):
- *   autoworker watch --github myorg/app --github myorg/api
- *   autoworker watch --logs "docker logs myapp --since 1h"
+ *   pokio watch --github myorg/app --github myorg/api
+ *   pokio watch --logs "docker logs myapp --since 1h"
  *
  * One-shot mode:
- *   autoworker "Fix the checkout bug"
- *   autoworker fix --repo myorg/app --issue "Cart total wrong"
- *   autoworker review --repo myorg/app --pr 42
+ *   pokio "Fix the checkout bug"
+ *   pokio fix --repo myorg/app --issue "Cart total wrong"
+ *   pokio review --repo myorg/app --pr 42
  *
  * Server mode:
- *   autoworker serve
+ *   pokio serve
  *
  * Interactive:
- *   autoworker chat
+ *   pokio chat
  */
 
 import { runWorker } from "./worker.js";
@@ -28,31 +28,31 @@ const command = args[0];
 
 if (!command || command === "--help" || command === "-h") {
   console.log(`
-  autoworker — your 24/7 AI employee
+  pokio — your 24/7 AI employee
 
   Autonomous (runs forever, finds its own work):
-    autoworker watch --github myorg/app          Watch repo for issues + PRs
-    autoworker watch --github myorg/app \\
+    pokio watch --github myorg/app          Watch repo for issues + PRs
+    pokio watch --github myorg/app \\
                      --github myorg/api \\
                      --logs "docker logs app"    Watch repos + logs
 
   One-shot (do one task):
-    autoworker "Fix the login timeout bug"       Run a task
-    autoworker fix --repo org/app --issue "…"    Fix a GitHub issue
-    autoworker review --repo org/app --pr 42     Review a PR
+    pokio "Fix the login timeout bug"       Run a task
+    pokio fix --repo org/app --issue "…"    Fix a GitHub issue
+    pokio review --repo org/app --pr 42     Review a PR
 
   Server:
-    autoworker serve                             HTTP API on :4747
+    pokio serve                             HTTP API on :4747
 
   Interactive:
-    autoworker chat                              REPL mode
+    pokio chat                              REPL mode
 
   Environment:
     MOONSHOT_API_KEY      Kimi K3 (default model)
     ANTHROPIC_API_KEY     Claude
     OPENAI_API_KEY        OpenAI
     GITHUB_TOKEN          GitHub access (gh CLI)
-    AUTOWORKER_MODEL      Default model (kimi-k3)
+    POKIO_MODEL      Default model (kimi-k3)
   `);
   process.exit(0);
 }
@@ -125,7 +125,7 @@ else if (command === "status") {
   ).all() as any[];
 
   if (tasks.length === 0) {
-    console.log("No tasks yet. Run: autoworker watch --github myorg/app");
+    console.log("No tasks yet. Run: pokio watch --github myorg/app");
   } else {
     for (const t of tasks) {
       console.log(`  ${t.status === "completed" ? "✓" : "…"} ${t.task.slice(0, 70)} (${t.status})`);
@@ -138,7 +138,7 @@ else if (command === "status") {
 else if (command === "fix") {
   const repo = getFlag("--repo");
   const issue = getFlag("--issue");
-  if (!repo || !issue) { console.error("Usage: autoworker fix --repo org/app --issue \"…\""); process.exit(1); }
+  if (!repo || !issue) { console.error("Usage: pokio fix --repo org/app --issue \"…\""); process.exit(1); }
   await run(`Clone https://github.com/${repo}. Fix: ${issue}. Run tests. Open a PR with gh CLI.`);
 }
 
@@ -147,7 +147,7 @@ else if (command === "fix") {
 else if (command === "review") {
   const repo = getFlag("--repo");
   const pr = getFlag("--pr");
-  if (!repo || !pr) { console.error("Usage: autoworker review --repo org/app --pr 42"); process.exit(1); }
+  if (!repo || !pr) { console.error("Usage: pokio review --repo org/app --pr 42"); process.exit(1); }
   await run(`Review PR #${pr} in ${repo}. Run: gh pr diff ${pr} --repo ${repo}. Post detailed review.`);
 }
 
@@ -155,7 +155,7 @@ else if (command === "review") {
 
 else if (command === "chat") {
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-  console.log("autoworker interactive mode. Type a task, press enter. Ctrl+C to quit.\n");
+  console.log("pokio interactive mode. Type a task, press enter. Ctrl+C to quit.\n");
 
   const prompt = () => {
     rl.question("→ ", async (input) => {

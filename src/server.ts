@@ -1,5 +1,5 @@
 /**
- * HTTP server — run AutoWorker as a service.
+ * HTTP server — run Pokio as a service.
  * POST /do     — give it a task
  * POST /github — GitHub operations
  * GET  /status — check what it's done
@@ -12,13 +12,13 @@ import { runWorker } from "./worker.js";
 
 const app = new Hono();
 
-app.get("/health", (c) => c.json({ status: "ok", agent: "autoworker" }));
+app.get("/health", (c) => c.json({ status: "ok", agent: "pokio" }));
 
 app.post("/do", async (c) => {
   const { task, model } = await c.req.json();
   if (!task) return c.json({ error: "task required" }, 400);
 
-  console.log(`[autoworker] Task: ${task}`);
+  console.log(`[pokio] Task: ${task}`);
 
   const result = await runWorker(task, {
     model,
@@ -66,7 +66,7 @@ app.get("/status", async (c) => {
 
 export function startServer(port = 4747) {
   serve({ fetch: app.fetch, port }, () => {
-    console.log(`\n  autoworker`);
+    console.log(`\n  pokio`);
     console.log(`  ✓ http://localhost:${port}`);
     console.log(`  ✓ POST /do    — give it a task`);
     console.log(`  ✓ POST /github — fix, review, issue`);

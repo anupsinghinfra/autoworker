@@ -1,9 +1,9 @@
-# AutoWorker
+# Pokio
 
 **AI employee that works 24/7. Watches your repos and logs, finds issues, fixes them, opens PRs. You just approve.**
 
 ```bash
-autoworker watch --github myorg/app --github myorg/api
+pokio watch --github myorg/app --github myorg/api
 ```
 
 That's it. It runs forever. Checks your repos every 10 minutes. When it finds a new issue, it reads the code, writes a fix, runs tests, and opens a PR. It asks you before merging. You approve from your terminal, or ignore and it waits.
@@ -13,7 +13,7 @@ Like [OpenWorker](https://github.com/andrewyng/openworker), but no desktop app. 
 ## Install
 
 ```bash
-npm install -g autoworker
+npm install -g pokio
 ```
 
 ## Setup
@@ -30,16 +30,16 @@ export GITHUB_TOKEN=ghp_...
 
 ```bash
 # Watch one repo
-autoworker watch --github myorg/app
+pokio watch --github myorg/app
 
 # Watch multiple repos
-autoworker watch --github myorg/app --github myorg/api --github myorg/web
+pokio watch --github myorg/app --github myorg/api --github myorg/web
 
 # Watch repos + production logs
-autoworker watch --github myorg/app --logs "docker logs myapp --since 1h"
+pokio watch --github myorg/app --logs "docker logs myapp --since 1h"
 
 # Custom check interval (default: 10 min)
-autoworker watch --github myorg/app --interval 5
+pokio watch --github myorg/app --interval 5
 ```
 
 ### What it does automatically
@@ -52,7 +52,7 @@ autoworker watch --github myorg/app --interval 5
 
 ### Approval flow
 
-AutoWorker **never** pushes to main or merges without asking:
+Pokio **never** pushes to main or merges without asking:
 
 ```
 [watcher] New issue: myorg/app#47 — "Checkout fails with > 10 items"
@@ -71,7 +71,7 @@ AutoWorker **never** pushes to main or merges without asking:
 You can also run it non-interactively (auto-approves):
 
 ```bash
-autoworker watch --github myorg/app &  # background, auto-approves
+pokio watch --github myorg/app &  # background, auto-approves
 ```
 
 ## One-shot mode
@@ -79,15 +79,15 @@ autoworker watch --github myorg/app &  # background, auto-approves
 Don't want 24/7? Just run one task:
 
 ```bash
-autoworker "Fix the login timeout bug in myorg/app"
-autoworker fix --repo myorg/app --issue "Cart total wrong"
-autoworker review --repo myorg/app --pr 42
+pokio "Fix the login timeout bug in myorg/app"
+pokio fix --repo myorg/app --issue "Cart total wrong"
+pokio review --repo myorg/app --pr 42
 ```
 
 ## Interactive mode
 
 ```bash
-autoworker chat
+pokio chat
 → Summarize the last 20 commits in myorg/app
 → Find all TODO comments and create GitHub issues
 → Write API docs from the codebase
@@ -96,7 +96,7 @@ autoworker chat
 ## HTTP server
 
 ```bash
-autoworker serve  # → http://localhost:4747
+pokio serve  # → http://localhost:4747
 
 curl -X POST http://localhost:4747/do \
   -d '{"task": "Fix the login bug in myorg/app"}'
@@ -110,13 +110,13 @@ curl -X POST http://localhost:4747/github \
 Run on [pokio.ai](https://pokio.ai) — always on, $0 when idle, no server to manage.
 
 ```bash
-autoworker deploy --host pokio.ai  # coming soon
+pokio deploy --host pokio.ai  # coming soon
 ```
 
 ## How it works
 
 ```
-autoworker watch --github myorg/app
+pokio watch --github myorg/app
         │
         │  every 10 min
         ▼
@@ -148,29 +148,29 @@ autoworker watch --github myorg/app
 
 ```bash
 # Default (fast, cheap)
-autoworker watch --github myorg/app
+pokio watch --github myorg/app
 
 # Use Claude for complex reasoning
-AUTOWORKER_MODEL=claude-opus autoworker watch --github myorg/app
+POKIO_MODEL=claude-opus pokio watch --github myorg/app
 
 # Use per-task
-autoworker "Design the new auth system"  # uses default
-AUTOWORKER_MODEL=claude-opus autoworker "Design the new auth system"  # uses opus
+pokio "Design the new auth system"  # uses default
+POKIO_MODEL=claude-opus pokio "Design the new auth system"  # uses opus
 ```
 
 ## Data
 
-All local. SQLite in `.autoworker/`. No cloud, no telemetry. Delete the folder to reset.
+All local. SQLite in `.pokio/`. No cloud, no telemetry. Delete the folder to reset.
 
 ```
-.autoworker/
-└── autoworker.db    # tasks, steps, seen items, config
+.pokio/
+└── pokio.db    # tasks, steps, seen items, config
 ```
 
 ## Programmatic API
 
 ```typescript
-import { runWorker, startWatchers } from "autoworker";
+import { runWorker, startWatchers } from "pokio";
 
 // One-shot
 const result = await runWorker("Fix the bug", {
@@ -190,4 +190,4 @@ Apache 2.0
 
 ---
 
-**[pokio.ai](https://pokio.ai)** — managed AutoWorker. Always on, $0 when idle.
+**[pokio.ai](https://pokio.ai)** — managed Pokio. Always on, $0 when idle.

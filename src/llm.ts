@@ -39,7 +39,7 @@ export async function llm(
   messages: Message[],
   opts: { model?: string; tools?: ToolDef[]; system?: string } = {},
 ): Promise<LLMResponse> {
-  const model = opts.model || process.env.AUTOWORKER_MODEL || "kimi-k3";
+  const model = opts.model || process.env.POKIO_MODEL || "kimi-k3";
   const provider = detectProvider(model);
 
   if (provider === "anthropic") return callAnthropic(messages, model, opts);

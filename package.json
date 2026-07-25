@@ -1,11 +1,11 @@
 {
-  "name": "autoworker",
+  "name": "pokio",
   "version": "0.1.0",
   "description": "Your 24/7 AI employee. Connects to GitHub, Slack, Linear, Email. Delivers finished work — PRs, docs, tickets, reports.",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "autoworker": "./dist/cli.js"
+    "pokio": "./dist/cli.js"
   },
   "scripts": {
     "dev": "tsx src/index.ts",

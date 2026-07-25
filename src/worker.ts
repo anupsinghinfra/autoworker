@@ -7,7 +7,7 @@ import { llm, type Message, type ToolCall } from "./llm.js";
 import { TOOL_DEFS, executeTool } from "./tools.js";
 import { db } from "./store.js";
 
-const SYSTEM = `You are AutoWorker — an AI employee that delivers finished work.
+const SYSTEM = `You are Pokio — an AI employee that delivers finished work.
 
 You have tools: shell (for git, gh, curl, npm), read_file, write_file, list_files, ask_human.
 
@@ -35,7 +35,7 @@ export async function runWorker(
   } = {},
 ): Promise<WorkResult> {
   const maxSteps = opts.maxSteps || 50;
-  const model = opts.model || process.env.AUTOWORKER_MODEL || "kimi-k3";
+  const model = opts.model || process.env.POKIO_MODEL || "kimi-k3";
   const messages: Message[] = [{ role: "user", content: task }];
   let steps = 0;
 
