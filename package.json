@@ -1,32 +1,28 @@
 {
   "name": "pokio",
   "version": "0.1.0",
-  "description": "Your 24/7 AI employee. Connects to GitHub, Slack, Linear, Email. Delivers finished work — PRs, docs, tickets, reports.",
-  "type": "module",
-  "main": "dist/index.js",
-  "bin": {
-    "pokio": "./dist/cli.js"
-  },
+  "private": true,
   "scripts": {
-    "dev": "tsx src/index.ts",
-    "build": "tsc",
-    "start": "node dist/index.js",
-    "cli": "tsx src/cli.ts"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
   },
-  "keywords": [
-    "ai-agent", "autonomous-worker", "openworker", "github-bot",
-    "slack-bot", "ai-employee", "devops", "automation", "llm"
-  ],
-  "license": "MIT",
   "dependencies": {
-    "better-sqlite3": "^11.0.0",
-    "hono": "^4.0.0",
-    "@hono/node-server": "^1.0.0"
+    "@types/better-sqlite3": "^7.6.13",
+    "better-sqlite3": "^13.0.1",
+    "next": "16.2.12",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
   },
   "devDependencies": {
-    "@types/better-sqlite3": "^7.6.0",
-    "@types/node": "^22.0.0",
-    "tsx": "^4.0.0",
-    "typescript": "^5.5"
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.12",
+    "tailwindcss": "^4",
+    "typescript": "^5"
   }
 }

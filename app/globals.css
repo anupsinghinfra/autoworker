@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #0a0a0a;
+  --text: #e8e4de;
+  --dim: rgba(232,228,222,0.4);
+  --muted: rgba(232,228,222,0.15);
+  --border: rgba(232,228,222,0.06);
+  --accent: #10b981;
+  --amber: #e8a849;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; -webkit-font-smoothing: antialiased; }
+::selection { background: rgba(16,185,129,0.2); }
