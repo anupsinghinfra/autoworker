@@ -6,7 +6,14 @@
 const ONCELL_API = process.env.ONCELL_API_URL || "https://api.oncell.ai";
 const ONCELL_KEY = process.env.ONCELL_API_KEY || "";
 
+export function oncellConfigured(): boolean {
+  return ONCELL_KEY.length > 0;
+}
+
 async function oncellFetch(path: string, opts: RequestInit = {}) {
+  if (!ONCELL_KEY) {
+    throw new Error("ONCELL_API_KEY not set — get a key at oncell.ai and export it before starting Pokio");
+  }
   const res = await fetch(`${ONCELL_API}${path}`, {
     ...opts,
     headers: {
@@ -15,6 +22,10 @@ async function oncellFetch(path: string, opts: RequestInit = {}) {
       ...opts.headers,
     },
   });
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`oncell ${res.status} on ${path}: ${body.slice(0, 300)}`);
+  }
   return res.json();
 }
 

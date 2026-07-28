@@ -102,6 +102,8 @@ export ONCELL_API_KEY=oncell_sk_...   # get at oncell.ai
 npm run dev
 ```
 
+Then open [localhost:3000/hire](http://localhost:3000/hire) — pick a role, name your Pokio, paste a GitHub token, choose repos to watch. Manage your team, watch activity, and approve pending actions at [/dashboard](http://localhost:3000/dashboard).
+
 Everything runs on [oncell](https://oncell.ai) — compute, state, LLM, durability. One key, everything works.
 
 ---

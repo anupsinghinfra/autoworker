@@ -1,53 +1,41 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createPokio, listPokios, deletePokio, updatePokio, getOrCreateOrg } from "../../../lib/db";
-import { deployPokio } from "../../../lib/oncell";
-import { getTemplate } from "../../../templates";
+import { createPokio, listPokios, deletePokio, listConnections, getOrCreateOrg } from "../../../lib/db";
+import { oncellConfigured } from "../../../lib/oncell";
+import { redeployPokio } from "../../../lib/deploy";
 
-// GET /api/pokios — list all pokios for an org
+// GET /api/pokios — list all pokios for an org (x-org-id header is the org name)
 export async function GET(req: NextRequest) {
-  const orgId = req.headers.get("x-org-id") || "default";
-  const pokios = listPokios(orgId);
-  return NextResponse.json({ pokios });
+  const orgId = getOrCreateOrg(req.headers.get("x-org-id") || "default");
+  const pokios = listPokios(orgId).map((p) => ({
+    ...p,
+    connections: listConnections(p.id),
+  }));
+  return NextResponse.json({ pokios, oncellConfigured: oncellConfigured() });
 }
 
 // POST /api/pokios — hire a new pokio
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { name, role, level, orgName, connections } = body;
+  const { name, role, level, orgName } = body;
 
   if (!name || !role) {
     return NextResponse.json({ error: "name and role required" }, { status: 400 });
   }
 
-  // Get or create org
   const orgId = getOrCreateOrg(orgName || "default");
-
-  // Create pokio record
   const pokio = createPokio(orgId, name, role, level || "senior");
 
-  // Get template for this role
-  const template = await getTemplate(role);
-
-  // Deploy as oncell agent
   try {
-    const deployed = await deployPokio(name, {
-      instructions: template.instructions,
-      model: template.model,
-      skills: template.skills,
-      tools: template.tools,
-    });
-
-    updatePokio(pokio.id, { oncell_agent_id: deployed.agentName });
-
+    const agentName = await redeployPokio(pokio);
     return NextResponse.json({
-      pokio: { ...pokio, oncell_agent_id: deployed.agentName },
+      pokio: { ...pokio, oncell_agent_id: agentName },
       deployed: true,
     });
-  } catch (e: any) {
+  } catch (e) {
     return NextResponse.json({
       pokio,
       deployed: false,
-      error: e.message,
+      error: e instanceof Error ? e.message : String(e),
     });
   }
 }

@@ -10,7 +10,8 @@ export default function Home() {
           <a href="#how" className="text-white/30 hover:text-white/50 hidden sm:block">HOW IT WORKS</a>
           <a href="#pricing" className="text-white/30 hover:text-white/50 hidden sm:block">PRICING</a>
           <a href="https://github.com/anupsinghinfra/pokio.ai" className="text-white/30 hover:text-white/50">GITHUB</a>
-          <a href="#signup" className="bg-emerald-500 text-[#0a0a0a] px-5 py-2 rounded-md font-bold">HIRE A POKIO</a>
+          <a href="/dashboard" className="text-white/30 hover:text-white/50 hidden sm:block">DASHBOARD</a>
+          <a href="/hire" className="bg-emerald-500 text-[#0a0a0a] px-5 py-2 rounded-md font-bold">HIRE A POKIO</a>
         </div>
       </nav>
 
@@ -24,7 +25,7 @@ export default function Home() {
             Engineers, support agents, researchers. They watch your repos, fix bugs, answer tickets, write reports. You just approve.
           </p>
           <div className="flex gap-3 justify-center flex-wrap">
-            <a href="#signup" className={`${M} bg-emerald-500 text-[#0a0a0a] px-8 py-3.5 rounded-lg font-bold text-sm tracking-wider`}>HIRE YOUR FIRST POKIO</a>
+            <a href="/hire" className={`${M} bg-emerald-500 text-[#0a0a0a] px-8 py-3.5 rounded-lg font-bold text-sm tracking-wider`}>HIRE YOUR FIRST POKIO</a>
             <a href="#how" className={`${M} border border-white/10 text-white/35 px-8 py-3.5 rounded-lg text-sm tracking-wider hover:border-white/20`}>SEE HOW IT WORKS</a>
           </div>
         </div>

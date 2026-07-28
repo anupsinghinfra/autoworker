@@ -3,8 +3,6 @@ export { support } from "./support";
 export { researcher } from "./researcher";
 export { ops } from "./ops";
 
-export const TEMPLATES: Record<string, any> = {};
-
 // Lazy import to avoid issues with Next.js
 export async function getTemplate(role: string) {
   switch (role) {

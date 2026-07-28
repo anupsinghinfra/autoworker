@@ -76,14 +76,16 @@ export function createPokio(orgId: string, name: string, role: string, level = "
   return getPokio(id)!;
 }
 
+type PokioRow = Omit<Pokio, "config"> & { config: string };
+
 export function getPokio(id: string): Pokio | null {
-  const row = db().prepare("SELECT * FROM pokios WHERE id = ?").get(id) as any;
+  const row = db().prepare("SELECT * FROM pokios WHERE id = ?").get(id) as PokioRow | undefined;
   if (!row) return null;
   return { ...row, config: JSON.parse(row.config || "{}") };
 }
 
 export function listPokios(orgId: string): Pokio[] {
-  const rows = db().prepare("SELECT * FROM pokios WHERE org_id = ? ORDER BY created_at DESC").all(orgId) as any[];
+  const rows = db().prepare("SELECT * FROM pokios WHERE org_id = ? ORDER BY created_at DESC").all(orgId) as PokioRow[];
   return rows.map(r => ({ ...r, config: JSON.parse(r.config || "{}") }));
 }
 
@@ -104,10 +106,51 @@ export function deletePokio(id: string): void {
   db().prepare("DELETE FROM pokios WHERE id = ?").run(id);
 }
 
+// ─── Connection CRUD ─────────────────────────────────────────────────────
+
+export interface Connection {
+  id: string;
+  pokio_id: string;
+  provider: string;
+  config: { targets?: string[] } & Record<string, unknown>;
+  created_at: string;
+}
+
+export function createConnection(
+  pokioId: string,
+  provider: string,
+  config: Record<string, unknown> = {},
+): Connection {
+  const id = `con_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+  db().prepare(
+    "INSERT INTO connections (id, pokio_id, provider, config) VALUES (?, ?, ?, ?)"
+  ).run(id, pokioId, provider, JSON.stringify(config));
+  return getConnection(id)!;
+}
+
+type ConnectionRow = Omit<Connection, "config"> & { config: string };
+
+export function getConnection(id: string): Connection | null {
+  const row = db().prepare("SELECT * FROM connections WHERE id = ?").get(id) as ConnectionRow | undefined;
+  if (!row) return null;
+  return { ...row, config: JSON.parse(row.config || "{}") };
+}
+
+export function listConnections(pokioId: string): Connection[] {
+  const rows = db().prepare(
+    "SELECT * FROM connections WHERE pokio_id = ? ORDER BY created_at"
+  ).all(pokioId) as ConnectionRow[];
+  return rows.map(r => ({ ...r, config: JSON.parse(r.config || "{}") }));
+}
+
+export function deleteConnection(id: string): void {
+  db().prepare("DELETE FROM connections WHERE id = ?").run(id);
+}
+
 // ─── Org CRUD ────────────────────────────────────────────────────────────
 
 export function getOrCreateOrg(name: string, oncellApiKey?: string): string {
-  const existing = db().prepare("SELECT id FROM orgs WHERE name = ?").get(name) as any;
+  const existing = db().prepare("SELECT id FROM orgs WHERE name = ?").get(name) as { id: string } | undefined;
   if (existing) return existing.id;
 
   const id = `org_${Date.now()}`;
